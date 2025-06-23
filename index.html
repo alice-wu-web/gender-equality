@@ -1,0 +1,286 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SDGs 性別平權遊戲</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: Arial, sans-serif;
+      background: url('images/bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+    #topic {
+      position: fixed;
+      top: 10px; left: 10px;
+      font-size: 20px;
+      color: white;
+      text-shadow: 1px 1px 3px #000;
+    }
+    #score {
+      position: fixed;
+      top: 10px; right: 10px;
+      font-size: 20px;
+      color: white;
+      text-shadow: 1px 1px 3px #000;
+    }
+    #characters {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 33%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 10px;
+    }
+    #characters img.character {
+      height: 90%;
+      cursor: pointer;
+      border: 2px solid white;
+      border-radius: 10px;
+      transition: transform 0.2s;
+    }
+    #characters img.character:hover {
+      transform: scale(1.1);
+      border-color: #ffcc00;
+    }
+    #questionBox {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      max-width: 90vw;
+      display: none;
+      text-align: center;
+    }
+    #questionBox p {
+      font-size: 22px;
+      margin-bottom: 15px;
+    }
+    #choices button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 18px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background-color: #2196f3;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    #choices button:hover {
+      background-color: #0b7dda;
+    }
+    #endBox {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.95);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      text-align: center;
+      display: none;
+    }
+    #endBox h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    #endBox button {
+      padding: 12px 30px;
+      font-size: 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      background-color: #4caf50;
+      color: white;
+      transition: background-color 0.3s;
+    }
+    #endBox button:hover {
+      background-color: #388e3c;
+    }
+    #retryBtn {
+      background-color: #f44336;
+    }
+    #retryBtn:hover {
+      background-color: #d32f2f;
+    }
+    #introBox {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.95);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.7);
+      text-align: center;
+      z-index: 999;
+    }
+    #introBox h2 {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
+    #introBox button {
+      margin-top: 20px;
+      padding: 12px 30px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2196f3;
+      color: white;
+      cursor: pointer;
+    }
+    #introBox button:hover {
+      background-color: #0b7dda;
+    }
+  </style>
+</head>
+<body>
+<audio id="bgMusic" src="images/music.mp3" loop></audio>
+
+<div id="topic">主題：性別平權</div>
+<div id="score">分數：0</div>
+
+<div id="characters">
+  <img src="images/people.png" class="character" alt="人物1" />
+  <img src="images/people02.png" class="character" alt="人物2" />
+  <img src="images/people03.png" class="character" alt="人物3" />
+  <img src="images/people04.png" class="character" alt="人物4" />
+  <img src="images/people05.png" class="character" alt="人物5" />
+  <img src="images/people06.png" class="character" alt="人物6" />
+  <img src="images/people07.png" class="character" alt="人物7" />
+</div>
+
+<div id="questionBox">
+  <p id="question"></p>
+  <div id="choices"></div>
+</div>
+
+<div id="endBox">
+  <h2 id="endMessage"></h2>
+  <button id="nextLevelBtn" onclick="goToNextLevel()" style="display:none;">下一關</button>
+  <button id="retryBtn" onclick="retryGame()" style="display:none;">重新挑戰</button>
+</div>
+
+<div id="introBox">
+  <h2>🎮 遊戲說明</h2>
+  <p>歡迎來到性別平權遊戲！</p>
+  <ul style="text-align: left; font-size: 18px;">
+    <li>點選畫面下方的人物，回答關於性別平權的問題。</li>
+    <li>每答對一題可獲得 10 分，累積滿 80 分即可過關！</li>
+    <li>完成所有題目後會顯示結果，看看你是否過關吧！</li>
+  </ul>
+  <button id="startBtn">確定，開始遊戲</button>
+</div>
+
+<script>
+  const questions = [
+    { q: "性別平權是否只關乎女性權益？", options: ["是", "否"], answer: 1 },
+    { q: "女性應該與男性享有相同的教育機會嗎？", options: ["是", "否"], answer: 0 },
+    { q: "讓男性獨占領導職位是否符合性別平權？", options: ["是", "否"], answer: 1 },
+    { q: "男女都可以照顧家庭嗎？", options: ["是", "否"], answer: 0 },
+    { q: "SDG 5 是性別平權的目標嗎？", options: ["是", "否"], answer: 0 },
+    { q: "刻板印象會影響性別平等的推進嗎？", options: ["是", "否"], answer: 0 },
+    { q: "職業應該依性別劃分嗎？", options: ["是", "否"], answer: 1 },
+    { q: "推動性別平權會讓社會更公平嗎？", options: ["是", "否"], answer: 0 },
+    { q: "只有女性需要為性別平權努力嗎？", options: ["是", "否"], answer: 1 },
+    { q: "性別平權與永續發展有關聯嗎？", options: ["是", "否"], answer: 0 }
+  ];
+
+  let score = 0;
+  let asked = [];
+
+  const scoreDisplay = document.getElementById('score');
+  const questionBox = document.getElementById('questionBox');
+  const questionText = document.getElementById('question');
+  const choicesDiv = document.getElementById('choices');
+  const endBox = document.getElementById('endBox');
+  const endMessage = document.getElementById('endMessage');
+  const nextLevelBtn = document.getElementById('nextLevelBtn');
+  const retryBtn = document.getElementById('retryBtn');
+
+  document.querySelectorAll('.character').forEach(img => {
+    img.style.pointerEvents = 'none';
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    document.getElementById('introBox').style.display = 'none';
+    document.querySelectorAll('.character').forEach(img => {
+      img.style.pointerEvents = 'auto';
+    });
+    const bgm = document.getElementById('bgMusic');
+    bgm.play().catch(err => {
+      console.log("音樂播放失敗：", err);
+    });
+  });
+
+  document.querySelectorAll('.character').forEach(img => {
+    img.addEventListener('click', showQuestion);
+  });
+
+  function showQuestion() {
+    if (asked.length >= questions.length) return;
+
+    let idx;
+    do {
+      idx = Math.floor(Math.random() * questions.length);
+    } while (asked.includes(idx));
+
+    asked.push(idx);
+
+    const q = questions[idx];
+    questionText.textContent = q.q;
+    choicesDiv.innerHTML = '';
+
+    q.options.forEach((option, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = option;
+      btn.onclick = () => {
+        if (i === q.answer) {
+          score += 10;
+          scoreDisplay.textContent = '分數：' + score;
+        }
+        questionBox.style.display = 'none';
+
+        if (asked.length === questions.length) {
+          endGame();
+        }
+      };
+      choicesDiv.appendChild(btn);
+    });
+
+    questionBox.style.display = 'block';
+  }
+
+  function endGame() {
+    endBox.style.display = 'block';
+    if (score >= 80) {
+      endMessage.textContent = "🎉 恭喜過關！";
+      nextLevelBtn.style.display = 'inline-block';
+      retryBtn.style.display = 'none';
+    } else {
+      endMessage.textContent = "😢 沒通過，請再試一次";
+      nextLevelBtn.style.display = 'none';
+      retryBtn.style.display = 'inline-block';
+    }
+  }
+
+  function goToNextLevel() {
+    window.location.href = "Level2.html";
+  }
+
+  function retryGame() {
+    location.reload();
+  }
+</script>
+</body>
+</html>

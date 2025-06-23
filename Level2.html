@@ -1,0 +1,239 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SDG 性別平權配對遊戲 - 第二關</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0; height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('images/bg02.jpg') no-repeat center center fixed;
+      background-size: cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.25);
+      width: 900px;
+      max-width: 90vw;
+      padding: 30px 40px;
+      box-sizing: border-box;
+    }
+    h1 {
+      text-align: center;
+      color: #4B0082;
+      margin-bottom: 20px;
+    }
+    #rulesBox {
+      background-color: #a288f4;
+      color: white;
+      border-radius: 12px;
+      padding: 25px 30px;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+    #rulesBox ul {
+      margin-left: 1.2em;
+    }
+    #rulesBox button {
+      margin-top: 20px;
+      background-color: #6b4fd1;
+      border: none;
+      padding: 12px 28px;
+      font-size: 18px;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #rulesBox button:hover {
+      background-color: #5938b7;
+    }
+    #gameArea {
+      display: none;
+      text-align: center;
+    }
+    #question {
+      font-size: 20px;
+      margin-bottom: 20px;
+      color: #4B0082;
+    }
+    .option {
+      background: #f2f2f2;
+      padding: 12px 20px;
+      margin: 8px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .option:hover {
+      background-color: #dcd0ff;
+    }
+    .selected {
+      background-color: #6b4fd1;
+      color: white;
+    }
+    #result, #scoreBoard, #levelButtons {
+      margin-top: 20px;
+    }
+    button.actionBtn {
+      background-color: #6b4fd1;
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      font-size: 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin: 0 12px;
+      transition: background-color 0.3s;
+    }
+    button.actionBtn:hover {
+      background-color: #4B0082;
+    }
+  </style>
+</head>
+<body>
+<audio id="bgMusic" src="images/music.mp3" loop></audio>
+
+<div class="container">
+  <h1>第二關：性別平權配對遊戲</h1>
+  <div id="rulesBox">
+    <h2>遊戲規則說明</h2>
+    <ul>
+      <li>共10題配對，每題10分。</li>
+      <li>正確配對題目與答案。</li>
+      <li>累積80分以上可進入第三關。</li>
+      <li>未達80分需重新挑戰。</li>
+    </ul>
+    <button id="startGame">確定，開始遊戲</button>
+  </div>
+
+  <div id="gameArea">
+    <div id="scoreBoard">分數：<span id="score">0</span>/100</div>
+    <div id="question"></div>
+    <div id="options"></div>
+    <div id="result"></div>
+    <div id="controlButtons">
+      <button class="actionBtn" id="nextBtn" disabled>下一題</button>
+    </div>
+    <div id="levelButtons" style="display:none;">
+      <button class="actionBtn" id="retryBtn">再玩一次</button>
+      <button class="actionBtn" id="nextLevelBtn">進入Level 3</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const questions = [
+    { q: "性別薪資差距", a: "女性平均收入低於男性" },
+    { q: "女性教育權", a: "女孩在某些地區無法就學" },
+    { q: "職場性別歧視", a: "女性升遷機會較低" },
+    { q: "父職參與", a: "鼓勵男性參與育兒" },
+    { q: "同工同酬", a: "相同工作應給予同等薪資" },
+    { q: "多元性別包容", a: "尊重跨性別者的工作權與生活權利" },
+    { q: "家務勞動價值", a: "無償家務需被社會與經濟認可" },
+    { q: "女性領導地位", a: "增加女性在政治與企業決策角色" },
+    { q: "性別教育", a: "學校中納入性別平等教育" },
+    { q: "婦女保護", a: "制止性暴力與家庭暴力" }
+  ];
+
+  let current = 0;
+  let score = 0;
+  let correctAnswer = "";
+
+  document.getElementById("startGame").onclick = () => {
+    document.getElementById("rulesBox").style.display = "none";
+    document.getElementById("gameArea").style.display = "block";
+    loadQuestion();
+
+    // 播放背景音樂
+    const bgm = document.getElementById("bgMusic");
+    bgm.play().catch(err => {
+      console.log("音樂播放失敗：", err);
+    });
+  };
+
+  function loadQuestion() {
+    const qObj = questions[current];
+    correctAnswer = qObj.a;
+    document.getElementById("question").textContent = `題目 ${current + 1}：${qObj.q}`;
+
+    const allAnswers = questions.map(q => q.a);
+    const shuffled = shuffleArray([correctAnswer, ...allAnswers.filter(a => a !== correctAnswer).slice(0, 2)]);
+
+    const optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+    shuffled.forEach(option => {
+      const div = document.createElement("div");
+      div.className = "option";
+      div.textContent = option;
+      div.onclick = () => selectOption(div);
+      optionsDiv.appendChild(div);
+    });
+  }
+
+  function selectOption(selectedDiv) {
+    document.querySelectorAll(".option").forEach(div => div.classList.remove("selected"));
+    selectedDiv.classList.add("selected");
+    document.getElementById("nextBtn").disabled = false;
+  }
+
+  document.getElementById("nextBtn").onclick = () => {
+    const selected = document.querySelector(".option.selected");
+    if (!selected) return;
+    if (selected.textContent === correctAnswer) {
+      score += 10;
+      document.getElementById("result").textContent = "✅ 答對了！";
+    } else {
+      document.getElementById("result").textContent = "❌ 答錯了！";
+    }
+    document.getElementById("score").textContent = score;
+    current++;
+    document.getElementById("nextBtn").disabled = true;
+
+    if (current < questions.length) {
+      setTimeout(() => {
+        document.getElementById("result").textContent = "";
+        loadQuestion();
+      }, 1000);
+    } else {
+      setTimeout(() => {
+        document.getElementById("question").style.display = "none";
+        document.getElementById("options").style.display = "none";
+        document.getElementById("controlButtons").style.display = "none";
+        document.getElementById("result").textContent = `總分：${score} 分`;
+        document.getElementById("levelButtons").style.display = "block";
+
+        if (score >= 80) {
+          document.getElementById("nextLevelBtn").style.display = "inline-block";
+          document.getElementById("retryBtn").style.display = "none";
+        } else {
+          document.getElementById("retryBtn").style.display = "inline-block";
+          document.getElementById("nextLevelBtn").style.display = "none";
+        }
+      }, 1000);
+    }
+  };
+
+  document.getElementById("retryBtn").onclick = () => location.reload();
+  document.getElementById("nextLevelBtn").onclick = () => window.location.href = "level3.html";
+
+  function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+</script>
+
+</body>
+</html>
